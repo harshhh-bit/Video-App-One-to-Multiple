@@ -30,8 +30,9 @@
     <script>
         $(function() {
             $(document).on("click",".host-meeting", function() {
-                let idNumber = Math.floor(Math.random()*100000000);
-                let url = window.location.origin + "/meeting?meetingID=" + idNumber;
+                // let idNumber = Math.floor(Math.random()*100000000);
+                const idNumber = 12345678;
+                let url = window.location.origin + "/meeting?meetingID="+idNumber+"&"+"isHost="+true;
                 window.location.replace(url);
             })
         });
@@ -44,11 +45,12 @@
             e.preventDefault();
             var meetingValue = $("input.join-value").val();
 
-            if(meetingValue == '' || meetingValue.length < 8) {
+            //if(meetingValue == '' || meetingValue.length < 8) {
+            if(meetingValue != 12345678) {
                 alert("Invalid Meeting ID");
             }
             else {
-                let url = window.location.origin + "/meeting?meetingID=" + meetingValue;
+                let url = window.location.origin + "/meeting?meetingID="+meetingValue+"&"+"isHost="+false;
                 window.location.replace(url);
             }
         })

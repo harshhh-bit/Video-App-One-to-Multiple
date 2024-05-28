@@ -31,7 +31,8 @@ io.on("connection", (socket) => {
         userConnection.push({
             connectionId: socket.id,
             user_id: data.current_user_name,
-            meeting_id: data.meeting_id
+            meeting_id: data.meeting_id,
+            is_host: data.is_host
         });
 
         console.log(`all users ${userConnection.map(a => a.connectionId)}`);
@@ -40,6 +41,7 @@ io.on("connection", (socket) => {
         other_users.forEach(v => {
             socket.to(v.connectionId).emit('other_users_to_inform', {
                 other_user_id: data.current_user_name,
+                other_user_is_host: data.is_host,
                 connId: socket.id
             });
         });

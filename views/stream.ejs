@@ -21,14 +21,6 @@
         <div class="call-wrap card" style="z-index: 99">
             <a id='meetingid' href="#" style="color: black;"></a>
             <div class="remote-video-wrap" id="remote-video" style="margin-bottom:0;background-color:rgb(131 131 131); display: flex;flex-wrap: wrap;">
-                <div>
-                    <div id="localUser" class="userbox remote-user div-center" style="flex-direction: column; height:100%;">
-                        <h5 class="div-center"><%= username %></h5>
-                        <div class="div-center">
-                            <video autoplay id="localStream" >
-                        </div>
-                    </div>
-                </div>
             </div>
             <a href="/">Leave</a>
         </div>
@@ -43,6 +35,7 @@
         var socketUrl = 'http://localhost:3000';
         var username = "<%= username %>";
         var meeting_id = "<%= meeting_id %>"; 
+        var is_host = "<%= is_host %>";
         var localUserVideo;
         var remoteStream = [];
         var audioStream = [];
@@ -61,10 +54,11 @@
         var socket = io.connect(socketUrl); //passing socketUrl is optional
         
         socket.on("connect", () => {
-            if(socket.connected) {
+            if(socket.connected) { // boolean that indicates whether the client is currently connected to the server
                 socket.emit("users_info_to_signaling_server", {
                     current_user_name: username,
-                    meeting_id: meeting_id
+                    meeting_id: meeting_id,
+                    is_host: is_host
                 });
             }
 
@@ -77,25 +71,29 @@
             $('#remote-video .other').remove();
             
             for(let i = 0; i < other_users.length; i++) {
-                addUser(other_users[i].user_id, other_users[i].connectionId);
-           
-                createConnection(other_users[i].connectionId);
+                //console.log(other_users[i].is_host);
+                if(other_users[i].is_host == "true") {
+                    addUser(other_users[i].user_id, other_users[i].is_host, other_users[i].connectionId);
+                    createConnection(other_users[i].connectionId, other_users[i].is_host);
+                }
             }
         });
 
         socket.on('other_users_to_inform', function(data) {
-            addUser(data.other_user_id, data.connId);
-            
-            createConnection(data.connId);
+            // console.log(other_users[i].is_host);
+            // if(data.other_user_is_host) {
+                //addUser(data.other_user_id, data.other_user_is_host, data.connId);
+                createConnection(data.connId, data.other_user_is_host);
+            //}
         });
 
-        function addUser(other_username, connId) {
+        function addUser(other_username, other_is_host, connId) { // need update
             $('#remote-video').append(`
-                <div id="`+connId+`" class="remote-user other div-center-column">
-                    <h5 class="div-center">`+other_username+`</h5>
+                <div id="` + connId + `" class="remote-user other div-center-column">
+                    <h5 class="div-center">` + other_username + `</h5>
                     <div class="div-center">
-                        <video autoplay id="video_`+connId+`"></video>
-                        <audio autoplay id="audio_`+connId+`"></audio>
+                        <video autoplay id="video_` + connId + `"></video>
+                        <audio autoplay id="audio_` + connId + `"></audio>
                     </div>
                 </div>
             `);
@@ -137,7 +135,7 @@
             ]
          }
 
-        async function createConnection(connId) {
+        async function createConnection(connId, is_host) {
             var connection = new RTCPeerConnection(iceConfig); // iceConfig: for ice candidate exchange
         
             connection.onicecandidate = function(event) {
@@ -160,7 +158,7 @@
                     audioStream[connId] = new MediaStream();
                 }
 
-                if(event.track.kind == 'video') {
+                if(event.track.kind == 'video' && is_host == 'true') {
                     remoteStream[connId].getTracks().forEach(t => remoteStream[connId].removeTrack(t));
                     
                     remoteStream[connId].addTrack(event.track);
@@ -170,10 +168,10 @@
                     remoteVideoDiv.srcObject = remoteStream[connId];
                     remoteVideoDiv.load();
                 }
-                else if(event.track.kind == 'audio') {
+                else if(event.track.kind == 'audio' && is_host == 'true') {
                     audioStream[connId].getTracks().forEach(t => audioStream[connId].removeTrack(t));
                     audioStream[connId].addTrack(event.track);
-
+   
                     var remoteAudioDiv = document.getElementById('audio_'+connId);
                     remoteAudioDiv.srcObject = null;
                     remoteAudioDiv.srcObject = audioStream[connId];
@@ -206,29 +204,31 @@
 
         async function processMedia() {
             try {
-                var vStream = null;
-                var aStream = null;
+                if(is_host == 'true') {
+                    var vStream = null;
+                    var aStream = null;
 
-                vStream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        width:720,
-                        height:480
-                    },
-                    audio: false
-                });
+                    vStream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width:720,
+                            height:480
+                        },
+                        audio: false
+                    });
 
-                aStream = await navigator.mediaDevices.getUserMedia({
-                    video: false,
-                    audio: true
-                });
+                    aStream = await navigator.mediaDevices.getUserMedia({
+                        video: false,
+                        audio: true
+                    });
 
-                audioTrack = aStream.getAudioTracks()[0]; // contains audio
-                audioTrack.enable = true;
-                updateMediaSenders(audioTrack, rtpAudioSenders);
+                    audioTrack = aStream.getAudioTracks()[0]; // contains audio
+                    audioTrack.enable = true;
+                    updateMediaSenders(audioTrack, rtpAudioSenders);
                 
-                mediaTrack = vStream.getVideoTracks()[0]; // contains video
-                localUserVideo.srcObject = new MediaStream([mediaTrack]);
-                updateMediaSenders(mediaTrack, rtpVideoSenders);
+                    mediaTrack = vStream.getVideoTracks()[0]; // contains video
+                    localUserVideo.srcObject = new MediaStream([mediaTrack]);
+                    updateMediaSenders(mediaTrack, rtpVideoSenders);
+                }
             }
             catch(err) {
                 console.log(err);
