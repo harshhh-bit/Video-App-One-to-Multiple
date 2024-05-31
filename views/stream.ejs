@@ -32,7 +32,7 @@
         var rtpAudioSenders = [];
         var rtpVideoSenders = [];
 
-        var socketUrl = 'http://localhost:3000';
+        var socketUrl = 'http://localhost:8000';
         var username = "<%= username %>";
         var meeting_id = "<%= meeting_id %>"; 
         var is_host = "<%= is_host %>";
@@ -43,6 +43,7 @@
         var mediaTrack;
         var users_connectionID = [];
         var users_connection = [];
+
         var sdpFunction;
         sdpFunction = (data, to_connid) => {
             socket.emit('sdpProcess', {
@@ -71,7 +72,6 @@
             $('#remote-video .other').remove();
             
             for(let i = 0; i < other_users.length; i++) {
-                //console.log(other_users[i].is_host);
                 if(other_users[i].is_host == "true") {
                     addUser(other_users[i].user_id, other_users[i].is_host, other_users[i].connectionId);
                     createConnection(other_users[i].connectionId, other_users[i].is_host);
@@ -80,11 +80,10 @@
         });
 
         socket.on('other_users_to_inform', function(data) {
-            // console.log(other_users[i].is_host);
-            // if(data.other_user_is_host) {
+            if(data.other_user_is_host) {
                 //addUser(data.other_user_id, data.other_user_is_host, data.connId);
                 createConnection(data.connId, data.other_user_is_host);
-            //}
+            }
         });
 
         function addUser(other_username, other_is_host, connId) { // need update
@@ -168,7 +167,7 @@
                     remoteVideoDiv.srcObject = remoteStream[connId];
                     remoteVideoDiv.load();
                 }
-                else if(event.track.kind == 'audio' && is_host == 'true') {
+                if(event.track.kind == 'audio' && is_host == 'true') {
                     audioStream[connId].getTracks().forEach(t => audioStream[connId].removeTrack(t));
                     audioStream[connId].addTrack(event.track);
    
@@ -182,7 +181,8 @@
             users_connectionID[connId] = connId;
             users_connection[connId] = connection;
 
-            updateMediaSenders(mediaTrack, rtpVideoSenders);
+            if(mediaTrack)
+                updateMediaSenders(mediaTrack, rtpVideoSenders);
         
             return connection;
         }
@@ -226,7 +226,8 @@
                     updateMediaSenders(audioTrack, rtpAudioSenders);
                 
                     mediaTrack = vStream.getVideoTracks()[0]; // contains video
-                    localUserVideo.srcObject = new MediaStream([mediaTrack]);
+                    if(localUserVideo)
+                        localUserVideo.srcObject = new MediaStream([mediaTrack]);
                     updateMediaSenders(mediaTrack, rtpVideoSenders);
                 }
             }

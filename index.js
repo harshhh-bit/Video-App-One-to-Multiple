@@ -1,26 +1,44 @@
+const fs = require('fs'); //the file system
 const express = require('express');
+const cors = require('cors');
+const https = require('https');
+const http = require('http');
+const path = require('path');
+
+const socketio = require('socket.io');
+
 const app = express();
 
-const socket = require('socket.io');
+app.use(cors()); //this will open our Express API to ANY domain
 
-const server = app.listen(3000, () => {
-    console.log("Server is running");
-});
-
-const bodyParser = require('body-parser');
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
-app.use(express.static('public'));
+const bodyParser = require('body-parser');
+app.use(bodyParser.json()); //this will allow us to parse json in the body with the body parser
+app.use(bodyParser.urlencoded({ extended: true }));
+
+const server = http.createServer({}, app);
+
+const io = socketio(server,{
+    cors: [
+        'https://localhost:3000',
+        'https://localhost:3001',
+        'https://localhost:3002',
+        'https://fxuav5g.live/',
+        // 'http://fxuav5g.live/', TEST ONLY
+    ]
+})
+
+server.listen(8000, () => {
+    console.log("Server is running");
+});
 
 const userRoutes = require('./routes/userRoute');
 
 app.use('/', userRoutes);
-
-const io = socket(server);
 
 // socket io work
 var userConnection = [];
