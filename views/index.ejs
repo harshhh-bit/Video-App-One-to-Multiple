@@ -3,20 +3,17 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
 
     <title>Group Video Call</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="/css/materialize.min.css">
     <link rel="stylesheet" href="/css/style.css">
-
 </head>
 
 <body>
     <div class="main-wrap">
         <div class="call-wrap card" style="z-index: 99">
-
             <div class="action-wrap" style="display: flex;justify-content: center; align-items: center;padding:30px;">
                 <div style="display:flex; justify-content:center;align-items:center;background-color:#00554d;height:50px;max-width:200px;min-width:200px;font-size:20px;align-self:center;color:white;margin-right:50px;border-radius:5px;" class="host-meeting">Host</div>
                 <div style="display:flex; justify-content:center;align-items:center;background-color:#00554d;height:50px;max-width:200px;min-width:200px;font-size:20px;align-self:center;color:white;border-radius:5px;" class="join-meeting">Join</div>
@@ -29,10 +26,10 @@
     <script src="/js/client.js"></script>
     <script>
         $(function() {
-            $(document).on("click",".host-meeting", function() {
-                // let idNumber = Math.floor(Math.random()*100000000);
-                const idNumber = 12345678;
-                let url = window.location.origin + "/meeting?meetingID="+idNumber+"&"+"isHost="+true;
+            $(document).on("click", ".host-meeting", function() {
+                const meeting_id = 123;
+                
+                let url = window.location.origin + "/stream"+"?"+"username=Host"+"&"+"meeting_id="+meeting_id+"&"+"is_host="+true;
                 window.location.replace(url);
             })
         });
@@ -43,20 +40,17 @@
 
         $(document).on("click", ".join-submit", function(e) {
             e.preventDefault();
+            
             var meetingValue = $("input.join-value").val();
 
-            //if(meetingValue == '' || meetingValue.length < 8) {
-            if(meetingValue != 12345678) {
+            if(meetingValue != 123) {
                 alert("Invalid Meeting ID");
             }
             else {
-                let url = window.location.origin + "/meeting?meetingID="+meetingValue+"&"+"isHost="+false;
+                let url = window.location.origin + "/meeting"+"?"+"meeting_id="+meetingValue+"&"+"is_host="+false;
                 window.location.replace(url);
             }
         })
-
     </script>
-
 </body>
-
 </html>
