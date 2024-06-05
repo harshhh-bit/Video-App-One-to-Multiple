@@ -44,11 +44,13 @@ app.use('/', userRoutes);
 var userConnection = [];
 
 io.on("connection", (socket) => {
-    socket.on("users_info_to_signaling_server", (data) => {
+    socket.on("user_info_to_signaling_server", (data) => {
+        console.log("Inside user_info_to_signaling_server");
+        
         var other_users = userConnection.filter(p => p.meeting_id == data.meeting_id);
         userConnection.push({
             connectionId: socket.id,
-            user_id: data.current_user_name,
+            user_id: data.current_username,
             meeting_id: data.meeting_id,
             is_host: data.is_host
         });
@@ -56,15 +58,17 @@ io.on("connection", (socket) => {
         console.log(`all users ${userConnection.map(a => a.connectionId)}`);
         console.log(`other users ${other_users.map(a => a.connectionId)}`);
     
-        other_users.forEach(v => {
-            socket.to(v.connectionId).emit('other_users_to_inform', {
-                other_user_id: data.current_user_name,
-                other_user_is_host: data.is_host,
-                connId: socket.id
-            });
-        });
+        other_users.forEach(other_user => {
+            if(other_user.is_host == "true") { // Host
+                socket.to(other_user.connectionId).emit('host_to_inform', {
+                    other_user_id: data.current_user_name,
+                    other_user_is_host: data.is_host,
+                    connId: socket.id
+                });
 
-        socket.emit("newConnectionInformation", other_users);
+                socket.emit("new_connection_information", other_user);
+            }
+        });
     });
 
     socket.on('sdpProcess', (data) => {

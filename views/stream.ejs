@@ -54,34 +54,38 @@
         
         socket.on("connect", () => {
             if(socket.connected) { // boolean that indicates whether the client is currently connected to the server
-                socket.emit("users_info_to_signaling_server", {
-                    current_user_name: username,
+                console.log("connection success");
+                socket.emit("user_info_to_signaling_server", {
+                    current_username: username,
                     meeting_id: meeting_id,
                     is_host: is_host
                 });
             }
+            else {
+               console.log("Connection Failed");
+            }
 
-            localConnectionID = socket.id;
-            localUserVideo = document.getElementById("localStream");
+            //localConnectionID = socket.id;
+            //localUserVideo = document.getElementById("localStream");
             processMedia();
         });
     
-        socket.on('newConnectionInformation', function(other_users) {
+        socket.on('new_connection_information', function(host) { // Host -> New User
             $('#remote-video .other').remove();
             
-            for(let i = 0; i < other_users.length; i++) {
-                if(other_users[i].is_host == "true") {
-                    addUser(other_users[i].user_id, other_users[i].is_host, other_users[i].connectionId);
-                    createConnection(other_users[i].connectionId, other_users[i].is_host);
-                }
-            }
+            //for(let i = 0; i < other_users.length; i++) {
+                //if(other_users[i].is_host == "true") {
+                    addUser(host.user_id, host.is_host, host.connectionId);
+                    createConnection(host.connectionId, host.is_host);
+                //}
+            //}
         });
 
-        socket.on('other_users_to_inform', function(data) {
-            if(data.other_user_is_host) {
-                //addUser(data.other_user_id, data.other_user_is_host, data.connId);
+        socket.on('host_to_inform', function(data) { // New User -> Host
+            //if(data.other_user_is_host) {
+                // addUser(data.other_user_id, data.other_user_is_host, data.connId);
                 createConnection(data.connId, data.other_user_is_host);
-            }
+            //}
         });
 
         function addUser(other_username, other_is_host, connId) { // need update
@@ -151,11 +155,11 @@
                     remoteStream[connId] = new MediaStream();
                 }
 
-                if(!audioStream[connId]) {
-                    audioStream[connId] = new MediaStream();
-                }
+                // if(!audioStream[connId]) {
+                //     audioStream[connId] = new MediaStream();
+                // }
 
-                if(event.track.kind == 'video' && is_host == 'true') {
+                if(event.track.kind == 'video') { //&& is_host == 'true') {
                     remoteStream[connId].getTracks().forEach(t => remoteStream[connId].removeTrack(t));
                     
                     remoteStream[connId].addTrack(event.track);
@@ -165,15 +169,15 @@
                     remoteVideoDiv.srcObject = remoteStream[connId];
                     remoteVideoDiv.load();
                 }
-                if(event.track.kind == 'audio' && is_host == 'true') {
-                    audioStream[connId].getTracks().forEach(t => audioStream[connId].removeTrack(t));
-                    audioStream[connId].addTrack(event.track);
+                // if(event.track.kind == 'audio' && is_host == 'true') {
+                //     audioStream[connId].getTracks().forEach(t => audioStream[connId].removeTrack(t));
+                //     audioStream[connId].addTrack(event.track);
    
-                    var remoteAudioDiv = document.getElementById('audio_'+connId);
-                    remoteAudioDiv.srcObject = null;
-                    remoteAudioDiv.srcObject = audioStream[connId];
-                    remoteAudioDiv.load();
-                }
+                //     var remoteAudioDiv = document.getElementById('audio_'+connId);
+                //     remoteAudioDiv.srcObject = null;
+                //     remoteAudioDiv.srcObject = audioStream[connId];
+                //     remoteAudioDiv.load();
+                // }
             }
 
             users_connectionID[connId] = connId;
@@ -201,9 +205,9 @@
 
         async function processMedia() {
             try {
-                if(is_host == 'true') {
+                // if(is_host == 'true') {
                     var vStream = null;
-                    var aStream = null;
+                    //var aStream = null;
 
                     vStream = await navigator.mediaDevices.getUserMedia({
                         video: {
@@ -213,20 +217,20 @@
                         audio: false
                     });
 
-                    aStream = await navigator.mediaDevices.getUserMedia({
-                        video: false,
-                        audio: true
-                    });
+                    // aStream = await navigator.mediaDevices.getUserMedia({
+                    //     video: false,
+                    //     audio: true
+                    // });
 
-                    audioTrack = aStream.getAudioTracks()[0]; // contains audio
-                    audioTrack.enable = true;
-                    updateMediaSenders(audioTrack, rtpAudioSenders);
+                    // audioTrack = aStream.getAudioTracks()[0]; // contains audio
+                    // audioTrack.enable = true;
+                    // updateMediaSenders(audioTrack, rtpAudioSenders);
                 
                     mediaTrack = vStream.getVideoTracks()[0]; // contains video
-                    localUserVideo.srcObject = new MediaStream([mediaTrack]);
+                    // localUserVideo.srcObject = new MediaStream([mediaTrack]);
                     updateMediaSenders(mediaTrack, rtpVideoSenders);
                 }
-            }
+            //}
             catch(err) {
                 console.log(err);
             }
