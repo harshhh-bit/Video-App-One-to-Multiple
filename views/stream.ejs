@@ -14,30 +14,26 @@
 </head>
 
 <body>
-    <div class="main-wrap">
-        <div class="call-wrap card" style="z-index: 99">
-            <a id='meetingid' href="#" style="color: black;"></a>
-            <div class="remote-video-wrap" id="remote-video" style="margin-bottom:0;background-color:rgb(131 131 131); display: flex;flex-wrap: wrap;">
-            </div>
-            <a href="/">Leave</a>
+        <div class="wrapper" id="remote-video">
         </div>
-    </div>
+        <a href="/">Leave</a>
     
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="/js/materialize.min.js"></script>
     <script src="/js/client.js"></script>
     <script>
-        var rtpAudioSenders = [];
+        // var rtpAudioSenders = [];
         var rtpVideoSenders = [];
 
         var socketUrl = 'http://localhost:8000';
-        var username = "<%= username %>";
+        // var username = "<%= username %>";
+        var username = "abc";
         var meeting_id = "<%= meeting_id %>"; 
         var is_host = "<%= is_host %>";
-        var localUserVideo;
+        //var localUserVideo;
         var remoteStream = [];
-        var audioStream = [];
-        var audioTrack;
+        //var audioStream = [];
+        // var audioTrack;
         var mediaTrack;
         var users_connectionID = [];
         var users_connection = [];
@@ -90,32 +86,37 @@
 
         function addUser(other_username, other_is_host, connId) { // need update
             $('#remote-video').append(`
-                <div id="` + connId + `" class="remote-user other div-center-column">
-                    <h5 class="div-center">` + other_username + `</h5>
-                    <div class="div-center">
-                        <video autoplay id="video_` + connId + `"></video>
-                        <audio autoplay id="audio_` + connId + `"></audio>
-                    </div>
-                </div>
+                <video autoplay id="video_` + connId + `"></video>
             `);
         }
 
+        // function addUser(other_username, other_is_host, connId) { // need update
+        //     $('#remote-video').append(`
+        //         <div id="` + connId + `" class="remote-user other div-center-column">
+        //             <h5 class="div-center">` + other_username + `</h5>
+        //             <div class="div-center">
+        //                 <video autoplay id="video_` + connId + `"></video>
+        //             </div>
+        //         </div>
+        //     `);
+        // }
+
         function updateMediaSenders(track, rtpSenders) { // rtpSender => other users
-            for(var connId in users_connection) {
+            for (var connId in users_connection) {
                 var connections = users_connection[connId];
-                if(connections && (connections.connectionState == "new" || 
-                connections.connectionState == "connecting" || 
-                connections.connectionState == "connected")) {
-                    if(rtpSenders[connId] && rtpSenders[connId].track) {
+                if (connections && (connections.connectionState == "new" || 
+                    connections.connectionState == "connecting" || 
+                    connections.connectionState == "connected")) {
+                    if (rtpSenders[connId] && rtpSenders[connId].track) {
                         rtpSenders[connId].replaceTrack(track);
-                    }
-                    else {
+                    } else {
+                    if (track instanceof MediaStreamTrack) {
                         rtpSenders[connId] = users_connection[connId].addTrack(track);
                     }
                 }
             }
         }
-        
+        }
         var iceConfig = {
             iceServers: [
                 {
@@ -165,10 +166,13 @@
                     remoteStream[connId].addTrack(event.track);
 
                     var remoteVideoDiv = document.getElementById('video_'+connId);
-                    remoteVideoDiv.srcObject = null;
-                    remoteVideoDiv.srcObject = remoteStream[connId];
-                    remoteVideoDiv.load();
+                    if(remoteVideoDiv) {
+                        remoteVideoDiv.srcObject = null;
+                        remoteVideoDiv.srcObject = remoteStream[connId];
+                        remoteVideoDiv.load();
+                    }
                 }
+            }
                 // if(event.track.kind == 'audio' && is_host == 'true') {
                 //     audioStream[connId].getTracks().forEach(t => audioStream[connId].removeTrack(t));
                 //     audioStream[connId].addTrack(event.track);
@@ -178,11 +182,10 @@
                 //     remoteAudioDiv.srcObject = audioStream[connId];
                 //     remoteAudioDiv.load();
                 // }
-            }
 
             users_connectionID[connId] = connId;
             users_connection[connId] = connection;
-
+            
             updateMediaSenders(mediaTrack, rtpVideoSenders);
         
             return connection;
@@ -205,7 +208,7 @@
 
         async function processMedia() {
             try {
-                // if(is_host == 'true') {
+                if(is_host == 'true') {
                     var vStream = null;
                     //var aStream = null;
 
@@ -228,9 +231,9 @@
                 
                     mediaTrack = vStream.getVideoTracks()[0]; // contains video
                     // localUserVideo.srcObject = new MediaStream([mediaTrack]);
-                    updateMediaSenders(mediaTrack, rtpVideoSenders);
+                    updateMediaSenders(mediaTrack, rtpVideoSenders); //...
                 }
-            //}
+            }
             catch(err) {
                 console.log(err);
             }
@@ -246,14 +249,14 @@
                 if(!users_connection[from_connid])
                     await createConnection(from_connid);
 
-                    await users_connection[from_connid].setRemoteDescription(new RTCSessionDescription(message.offer));
-                    var answer = await users_connection[from_connid].createAnswer();
+                await users_connection[from_connid].setRemoteDescription(new RTCSessionDescription(message.offer));
+                var answer = await users_connection[from_connid].createAnswer();
                     
-                    await users_connection[from_connid].setLocalDescription(answer);
+                await users_connection[from_connid].setLocalDescription(answer);
 
-                    sdpFunction(JSON.stringify({
-                        'answer': answer
-                    }), from_connid);
+                sdpFunction(JSON.stringify({
+                    'answer': answer
+                }), from_connid);
             }
             else if(message.iceCandidate) {
                 if(!users_connection[from_connid])
@@ -271,7 +274,7 @@
         }
 
         socket.on('closedConnectionInfo', function(connId) {
-            $('#'+connId).remove();
+            // $('#'+connId).remove();
             users_connectionID[connId] = null;
             users_connection[connId].close();
             users_connection[connId] = null;

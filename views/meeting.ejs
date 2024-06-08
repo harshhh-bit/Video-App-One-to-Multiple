@@ -46,8 +46,17 @@
             event.preventDefault();
 
             const username = document.querySelector('.set-username').value;
-            const meeting_id = 123;
-            const is_host = false;
+
+            // Get the query string from the current URL
+            let queryString = window.location.search;
+            
+            // Use URLSearchParams to get the query parameters
+            let params = new URLSearchParams(queryString);
+
+            // Retrieve specific parameters
+            let meeting_id = params.get('meeting_id');;
+            
+            let is_host = false;
 
             let url = window.location.origin + "/stream"+"?"+"username="+username+"&"+"meeting_id="+meeting_id+"&"+"is_host="+is_host;
             window.location.replace(url);

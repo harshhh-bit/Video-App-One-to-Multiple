@@ -61,7 +61,7 @@ io.on("connection", (socket) => {
         other_users.forEach(other_user => {
             if(other_user.is_host == "true") { // Host
                 socket.to(other_user.connectionId).emit('host_to_inform', {
-                    other_user_id: data.current_user_name,
+                    other_user_id: data.current_username,
                     other_user_is_host: data.is_host,
                     connId: socket.id
                 });
@@ -83,10 +83,11 @@ io.on("connection", (socket) => {
         if(disUser) {
             var meetingId = disUser.meeting_id;
             userConnection = userConnection.filter(p => p.connectionId != socket.id);
-            var restUser = userConnection.filter( p => p.meeting_id == meetingId);
-            restUser.forEach(n => {
-                socket.to(n.connectionId).emit('closedConnectionInfo');
-            });
+            var host = userConnection.filter( p => p.is_host == 'true');
+            // var restUser = userConnection.filter( p => p.meeting_id == meetingId);
+            //restUser.forEach(n => {
+            socket.to(host.connectionId).emit('closedConnectionInfo', socket.id);
+            //});
         }
     });
 })
