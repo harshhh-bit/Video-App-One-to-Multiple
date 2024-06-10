@@ -275,10 +275,10 @@ h2 {
 }
 
 button {
-  background: #fff;
-  color: #000;
+    background: #ed0d0d;
+    color: #d7cece;
   font-weight: 600;
-  border: none;
+  
   padding: 12px 20px;
   cursor: pointer;
   border-radius: 3px;
@@ -289,9 +289,10 @@ button {
 }
 
 button:hover {
-  color: #fff;
-  border-color: #fff;
-  background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+  border-color: #760c0c;
+  background: rgba(231, 9, 9, 0.84);
+  transform: scale(1.125);
 }
 
 .register {
@@ -318,4 +319,33 @@ button:hover {
     
     height: 100%;
     width: 100%;
+  }
+
+  .wrapper {
+    position: relative;
+    
+  }
+  
+  .wrapper.video {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background-color: #ccc;
+  }
+  
+  .wrapper .video-content {
+    position: absolute;
+    bottom: 2%;
+    right: 2%;
+  }
+
+  .wrapper .recorder {
+    position: absolute;
+    bottom: 2%;
+    left: 2%;
+  }
+ 
+  .btn:active {
+    transform: scale(1.025);
   }
