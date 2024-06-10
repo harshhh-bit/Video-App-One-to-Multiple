@@ -349,3 +349,14 @@ button:hover {
   .btn:active {
     transform: scale(1.025);
   }
+
+ #recording{
+      
+      background-color:rgb(0, 200, 83);
+      color: #d3ebcc;
+ }
+
+ #recording:hover{
+     
+  border: #07d63e;
+}
