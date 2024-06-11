@@ -26,7 +26,7 @@
               <div class="recorder " >
                   
                  
-                <button class="btn" id="recording">Start  Recording</button>
+                <button class="btn" id="recording">Start Recording</button>
               </div>
 
         </div>
@@ -38,6 +38,7 @@
     <script>
         // var rtpAudioSenders = [];
         var rtpVideoSenders = [];
+
 
         var socketUrl = 'http://localhost:8000';
         // var username = "<%= username %>";
@@ -53,6 +54,7 @@
         }
         //var localUserVideo;
         var remoteStream = [];
+        var remoteVideo;
         //var audioStream = [];
         // var audioTrack;
         var mediaTrack;
@@ -186,11 +188,11 @@
                     
                     remoteStream[connId].addTrack(event.track);
 
-                    var remoteVideoDiv = document.getElementById('video_'+connId);
-                    if(remoteVideoDiv) {
-                        remoteVideoDiv.srcObject = null;
-                        remoteVideoDiv.srcObject = remoteStream[connId];
-                        remoteVideoDiv.load();
+                    remoteVideo = document.getElementById('video_'+connId);
+                    if(remoteVideo) {
+                        remoteVideo.srcObject = null;
+                        remoteVideo.srcObject = remoteStream[connId];
+                        remoteVideo.load();
                     }
                 }
             }
@@ -293,7 +295,97 @@
                 }
             }
         }
+        let mediaRecorder;
+        let recordedBlobs = [];
 
+        var record_btn = document.querySelector('#recording');
+        record_btn.addEventListener("click", function() {
+            if(record_btn.textContent == 'Start Recording') {
+                startRecording();
+            }
+            else {
+                stopRecording();
+                
+                mediaRecorder.onstop = function() {
+                    downloadRecording();
+                };
+            }
+        });
+
+        function downloadRecording() {
+            //console.log(recordedBlobs);
+            const blob = new Blob(recordedBlobs, {
+                type: "video/webm"
+            });
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'drone_live_stream_recorded.webm';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 100);
+        }
+        
+        function handleDataAvailable(event) {
+            if(event.data && event.data.size > 0) {
+                console.log(event.data);
+                recordedBlobs.push(event.data);
+                console.log(recordedBlobs);
+            }
+        }
+
+        function startRecording() {
+            recordedBlobs = [];
+
+            let options;
+
+            options = {
+                mimeType: 'video/webm;codecs=vp9,opus'
+            }
+            if(!MediaRecorder.isTypeSupported(options.mimeType)) {
+                console.error(`${options.mimeType} is not Supported`);
+                
+                options = {
+                    mimeType: 'video/webm;codecs=vp8,opus'
+                }
+                if(!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    console.error(`${options.mimeType} is not Supported`);
+                    
+                    options = {
+                        mimeType: 'video/webm'
+                    }
+                    if(!MediaRecorder.isTypeSupported(options.mimeType)) {
+                        console.error(`${options.mimeType} is not Supported`);
+                        
+                        options = {
+                            mimeType: ''
+                        }
+                    }
+                }
+            }
+
+            try {
+                let stream = remoteVideo.srcObject;
+                console.log(stream);
+                mediaRecorder = new MediaRecorder(stream, options);
+            } catch(error) {
+                console.error("Media recorder error:", error);
+            }
+
+            mediaRecorder.start();
+            recording.textContent = 'Stop Recording';
+            mediaRecorder.ondataavailable = handleDataAvailable;
+        }
+
+        function stopRecording() {
+            mediaRecorder.stop();
+            recording.textContent = 'Start Recording';
+        }
         socket.on('closedConnectionInfo', function(connId) {
             // $('#'+connId).remove();
             users_connectionID[connId] = null;
