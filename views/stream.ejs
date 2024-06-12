@@ -378,11 +378,13 @@
             }
 
             mediaRecorder.start();
+            recording.style.backgroundColor='#e70909d6';
             recording.textContent = 'Stop Recording';
             mediaRecorder.ondataavailable = handleDataAvailable;
         }
 
         function stopRecording() {
+            recording.style.backgroundColor='#07d63e';
             mediaRecorder.stop();
             recording.textContent = 'Start Recording';
         }

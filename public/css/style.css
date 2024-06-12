@@ -291,7 +291,7 @@ button {
 button:hover {
     color: #ffffff;
   border-color: #760c0c;
-  background: rgba(231, 9, 9, 0.84);
+  background: #e70909d6;
   transform: scale(1.125);
 }
 
