@@ -11,6 +11,12 @@ const app = express();
 
 app.use(cors()); //this will open our Express API to ANY domain
 
+// app.use((req, res, next) => {
+//     res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+//     res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+//     next();
+//   });
+  
 app.use(express.static('public'));
 
 app.set('view engine', 'ejs');
@@ -44,26 +50,24 @@ app.use('/', userRoutes);
 var userConnection = [];
 
 io.on("connection", (socket) => {
+    console.log("A user connected with id: ", socket.id);
+    
     socket.on("user_info_to_signaling_server", (data) => {
-        console.log("Inside user_info_to_signaling_server");
+        var other_users = userConnection.filter(p => p.droneID === data.droneID);
         
-        var other_users = userConnection.filter(p => p.meeting_id == data.meeting_id);
         userConnection.push({
             connectionId: socket.id,
-            user_id: data.current_username,
-            meeting_id: data.meeting_id,
-            is_host: data.is_host
+            droneID: data.droneID,
+            isHost: data.isHost
         });
 
         console.log(`all users ${userConnection.map(a => a.connectionId)}`);
         console.log(`other users ${other_users.map(a => a.connectionId)}`);
     
         other_users.forEach(other_user => {
-            if(other_user.is_host == "true") { // Host
+            if(other_user.isHost === 'true') { // Host
                 socket.to(other_user.connectionId).emit('host_to_inform', {
-                    other_user_id: data.current_username,
-                    other_user_is_host: data.is_host,
-                    connId: socket.id
+                    connId: socket.id,
                 });
 
                 socket.emit("new_connection_information", other_user);
@@ -81,9 +85,9 @@ io.on("connection", (socket) => {
     socket.on('disconnect', function() {
         var disUser = userConnection.find(p => p.connectionId == socket.id);
         if(disUser) {
-            var meetingId = disUser.meeting_id;
+            var droneID = disUser.droneID;
             userConnection = userConnection.filter(p => p.connectionId != socket.id);
-            var host = userConnection.filter( p => p.is_host == 'true');
+            var host = userConnection.filter( p => p.isHost == 'true');
             // var restUser = userConnection.filter( p => p.meeting_id == meetingId);
             //restUser.forEach(n => {
             socket.to(host.connectionId).emit('closedConnectionInfo', socket.id);

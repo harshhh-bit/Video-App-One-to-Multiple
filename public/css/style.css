@@ -1,213 +1,3 @@
-/* body {
-    background-image: url(../images/bg.jpg);
-    background-size: cover;
-}
-
-.main-wrap {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-video {
-    background: black;
-    border: 1px solid gray;
-}
-
-.call-wrap {
-    position: relative;
-    display: block;
-    padding: 10px;
-}
-
-#local-video {
-    width: 100px;
-    height: 100px;
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    z-index: 9;
-}
-
-
-
-.chat-wrap {
-    display: block;
-    width: 400px;
-    margin-left: 15px;
-    padding: 10px;
-    max-height: 500px;
-    overflow-y: scroll;
-}
-
-.call-hang-status {
-    position: absolute;
-    z-index: 999;
-    height: 97%;
-    width: 100%;
-}
-
-.calling-status-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    z-index: 9;
-}
-
-.user-image img {
-    height: 150px;
-    width: 150px;
-}
-
-.user-name {
-    padding: 5px 0;
-    font-size: 18px;
-}
-
-.user-calling-status {
-    padding: 15px 0;
-    font-size: 18px;
-}
-
-.calling-action {
-    padding: 50px 0 0 0;
-    display: flex;
-}
-
-.audio-icon {
-    border-radius: 50%;
-    padding: 8px;
-    cursor: pointer;
-    margin-right: 20px;
-}
-
-.close-icon {
-    border-radius: 50%;
-    padding: 8px;
-    cursor: pointer;
-}
-
-.call-status-wrap {
-    height: 500px;
-    width: 500px;
-}
-
-.calling-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    z-index: 9;
-}
-
-.calling-hang-action {
-    padding: 420px 0 0 0;
-    display: flex;
-}
-
-.video-toggle {
-    border-radius: 50%;
-    padding: 8px;
-    margin-right: 20px;
-    cursor: pointer;
-}
-
-.audio-toggle {
-    border-radius: 50%;
-    padding: 8px;
-    margin-right: 20px;
-    cursor: pointer;
-}
-
-.call-cancel-icon {
-    border-radius: 50%;
-    padding: 8px;
-    cursor: pointer;
-}
-
-.chat-wrap {
-    display: block;
-    width: 400px;
-    margin-left: 15px;
-    padding: 10px;
-    max-height: 500px;
-    overflow-y: scroll;
-    display: flex;
-    flex-direction: column;
-    align-self: flex-end;
-    margin-bottom: 75px;
-}
-
-#remote-video {
-    width: 60vw;
-    height: 600px;
-}
-
-#remote-video > * {
-
-    flex: 1 1 250px;
-    border: 1px solid white;
-    /* background-color:brown;
-}
-
-video {
-    height: 200px;
-}
-
-.div-center {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.div-center-column {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-}
-
-#panell {
-    margin-top: 100px;
-    padding: 0px;
-}
-
-#loginbtn {
-    float: right;
-    margin-bottom: 10px;
-    margin-right: 10px;
-}
-
-#title {
-    background-color: #192827;
-    color: white;
-    padding: 8px;
-    margin-top: 0px
-}
-
-form {
-    padding: 0px;
-    border-radius: 3px;
-    box-sizing: border-box;
-}
-
-#username,
-#password {
-    margin-left: 20px;
-    margin-right: 20px;
-}
-
-div#panell {
-    background-color: white;
-    width: 80%;
-    margin-left: 10%;
-    margin-top: 20%;
-} */
-
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@200;300;400;500;600;700&display=swap");
 
 * {
@@ -244,41 +34,21 @@ body::before {
   }
 }
 
-.wrapper {
+.container {
   width: 100%;
   height: 95vh;
   border-radius: 8px;
-  
+  position: relative;
   text-align: center;
   border: 1px solid rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 
-
-h2 {
-  font-size: 2rem;
-  margin-bottom: 20px;
-  color: #fff;
-}
-
-
-
-
-.wrapper a {
-  color: #efefef;
-  text-decoration: none;
-}
-
-.wrapper a:hover {
-  text-decoration: underline;
-}
-
 button {
-    background: #ed0d0d;
-    color: #d7cece;
+  background: #ed0d0d;
+  color: #d7cece;
   font-weight: 600;
-  
   padding: 12px 20px;
   cursor: pointer;
   border-radius: 3px;
@@ -289,74 +59,46 @@ button {
 }
 
 button:hover {
-    color: #ffffff;
+  color: #ffffff;
   border-color: #760c0c;
   background: #e70909d6;
   transform: scale(1.125);
 }
 
-.register {
-  text-align: center;
-  margin-top: 30px;
-  color: #fff;
+video{    
+  height: 100%;
+  width: 100%;
 }
 
-.title {
-    color: #f8f6f6;
-    margin-bottom: 0px;
-    font-size: 24px;
-    font-weight: bold;
-  }
+.container.video {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-color: #ccc;
+}
 
-  .logo {
-    background: url('fxuav.png') no-repeat center;
-    background-size: contain;
-    height: 130px;
-    /* margin-bottom: 20px; */
-  }
+.container .leave {
+  position: absolute;
+  bottom: 2%;
+  right: 2%;
+}
 
-  video{
-    
-    height: 100%;
-    width: 100%;
-  }
-
-  .wrapper {
-    position: relative;
-    
-  }
-  
-  .wrapper.video {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    background-color: #ccc;
-  }
-  
-  .wrapper .video-content {
-    position: absolute;
-    bottom: 2%;
-    right: 2%;
-  }
-
-  .wrapper .recorder {
-    position: absolute;
-    bottom: 2%;
-    left: 2%;
-  }
+.container .record {
+  position: absolute;
+  bottom: 2%;
+  left: 2%;
+} 
  
-  .btn:active {
-    transform: scale(1.025);
-  }
+.btn:active {
+  transform: scale(1.025);
+}
 
- #recording{
-      
-      background-color:rgb(0, 200, 83);
-      color: #d3ebcc;
- }
+#record-btn {
+  background-color:rgb(0, 200, 83);
+  color: #d3ebcc;
+}
 
- #recording:hover{
-     
+#record-btn:hover{     
   border: #07d63e;
 }
