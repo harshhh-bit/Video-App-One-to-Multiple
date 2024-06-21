@@ -51,9 +51,21 @@ var userConnection = [];
 
 io.on("connection", (socket) => {
     console.log("A user connected with id: ", socket.id);
-    
+
     socket.on("user_info_to_signaling_server", (data) => {
         var other_users = userConnection.filter(p => p.droneID === data.droneID);
+        
+        var host;
+        other_users.forEach(other_user => {
+            if(other_user.isHost === 'true') { // Host
+                host = other_user;
+            }
+        });
+
+        if((host !== undefined) && (data.isHost === 'true')) {
+            socket.emit('host_already_exists');
+            return;
+        }
         
         userConnection.push({
             connectionId: socket.id,
@@ -63,16 +75,15 @@ io.on("connection", (socket) => {
 
         console.log(`all users ${userConnection.map(a => a.connectionId)}`);
         console.log(`other users ${other_users.map(a => a.connectionId)}`);
-    
-        other_users.forEach(other_user => {
-            if(other_user.isHost === 'true') { // Host
-                socket.to(other_user.connectionId).emit('host_to_inform', {
-                    connId: socket.id,
-                });
-
-                socket.emit("new_connection_information", other_user);
-            }
-        });
+        
+        if(host !== undefined) {
+            socket.to(host.connectionId).emit('host_to_inform', {
+                connId: socket.id,
+            });
+        }
+        
+        if(data.isHost === 'false')
+            socket.emit('new_connection_information', host);    
     });
 
     socket.on('sdpProcess', (data) => {
@@ -84,14 +95,27 @@ io.on("connection", (socket) => {
 
     socket.on('disconnect', function() {
         var disUser = userConnection.find(p => p.connectionId == socket.id);
-        if(disUser) {
-            var droneID = disUser.droneID;
-            userConnection = userConnection.filter(p => p.connectionId != socket.id);
-            var host = userConnection.filter( p => p.isHost == 'true');
-            // var restUser = userConnection.filter( p => p.meeting_id == meetingId);
-            //restUser.forEach(n => {
-            socket.to(host.connectionId).emit('closedConnectionInfo', socket.id);
-            //});
+        
+        userConnection = userConnection.filter(p => p.connectionId != socket.id);
+
+        if(disUser && (disUser.isHost === 'true')) {
+            var other_users = userConnection.filter(p => p.droneID === disUser.droneID);
+            other_users.forEach(other_user => {
+                socket.to(other_user.connectionId).emit('host_left_info');
+            });
+        }
+        
+        if(disUser && (disUser.isHost === 'false')) {
+            var other_users = userConnection.filter(p => p.droneID === disUser.droneID);
+            
+            var host;
+            other_users.forEach(other_user => {
+                if(other_user.isHost === 'true')
+                    host = other_user;
+            });
+
+            if(host !== undefined)
+                socket.to(host.connectionId).emit('other_user_left_info', socket.id);
         }
     });
 })
