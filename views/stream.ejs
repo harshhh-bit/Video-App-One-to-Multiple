@@ -71,20 +71,30 @@
 
             processMedia();
         });
+
+        socket.on('host_already_exists', function() {
+            alert('Drone is already streaming');
+            window.location.href = '/';
+        })
     
         socket.on('new_connection_information', function(host) { // Host -> New User
-            $('#remote-video .other').remove();
+            if(host !== undefined) {
+                $('#remote-video .other').remove();
             
-            addUser(host.connectionId);
-            createConnection(host.connectionId);
-            
+                addUser(host.connectionId);
+                createConnection(host.connectionId);
+            }
+            else {
+                alert('Drone is not streaming');
+                window.location.href = '/';
+            }
         });
 
         socket.on('host_to_inform', function(data) { // New User -> Host
             createConnection(data.connId);
         });
 
-        function addUser(connId) { // need update
+        function addUser(connId) {
             $('#remote-video').prepend(`
                 <video autoplay id="video_` + connId + `"></video>
             `);
@@ -113,20 +123,19 @@
                 {
                     urls: 'stun:stun.l.google.com:19302'
                 },
+                // {
+                //     urls: 'stun:stun1.l.google.com:3478'
+                // },
+                // {
+                //     urls: 'stun:stun2.l.google.com:19302'
+                // },
                 {
-                    urls: 'stun:stun1.l.google.com:3478'
-                },
-                {
-                    urls: 'stun:stun2.l.google.com:19302'
-                },
-                {
-                    urls: 'stun:stun3.l.google.com:3478'
-                },
-                {
-                    urls: 'stun:stun4.l.google.com:19302'
+                    urls: 'turn:192.158.29.39:3478?transport=udp',
+                    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+                    username: '28224511:1379330808'
                 }
             ]
-         }
+        }
 
         async function createConnection(connId) {
             var connection = new RTCPeerConnection(iceConfig); // iceConfig: for ice candidate exchange
@@ -236,6 +245,7 @@
             }
         }
 
+        
         let mediaRecorder;
         let recordedBlobs = [];
 
@@ -328,18 +338,21 @@
             }, 100);
         }
 
-        socket.on('closedConnectionInfo', function(connId) {
-            // $('#'+connId).remove();
+
+        const leaveButton = document.getElementById('leave-btn');
+        leaveButton.onclick = function() {
+            window.location.href = '/';
+        };
+
+        socket.on('host_left_info', () => {
+            alert('Drone has stopped streaming');
+            window.location.href = '/';
+        });
+
+        socket.on('other_user_left_info', function(connId) {
             users_connectionID[connId] = null;
             users_connection[connId].close();
             users_connection[connId] = null;
-            if(remoteStream[connId]) {
-                remoteStream[connId].getTracks().forEach(t => {
-                    t.stop();
-                });
-
-                remoteStream[connId] = null;
-            }
         });
     </script>
 
